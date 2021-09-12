@@ -67,6 +67,9 @@ class mainComponent extends React.Component {
     render() {
         return (
             <div>
+                <div>
+                    <h1 class="display-1 my-2 mx-4">Image Editor</h1>
+                </div>
                 <div class='mt-4'>
                     <div style={{ display: 'flex', justifyContent: 'space-around' }}>
                         <div style={{ width: '35%' }}>
