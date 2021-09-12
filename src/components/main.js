@@ -1,39 +1,41 @@
 import React from 'react';
-import '../styles/Main.css';
 import mergeImages from 'merge-images';
 
 class mainComponent extends React.Component {
+
     constructor(props) {
         super(props);
         this.state = {
             mergeImage: "",
-            file1: "",
-            file2: "",
-            file2x: 0,
-            file2y: 0,
-            file1x: 0,
-            file1y: 0,
+            backgroundImage: "",
+            overlayImage: "",
+            overlayImagex: 0,
+            overlayImagey: 0,
+            backgroundImagex: 0,
+            backgroundImagey: 0,
         }
     }
 
-    handleChange(event, name) {
+    uploadImage(event, name) {
         if (event.target.files[0]) {
             this.setState({
-                ...this.state,
                 [name]: URL.createObjectURL(event.target.files[0])
             })
         }
     }
 
-    mergeImage(file1, file2) {
-        mergeImages([
-            { src: file1, x: this.state.file1x, y: this.state.file1y },
-            { src: file2, x: this.state.file2x, y: this.state.file2y }
-        ]).then(b64 => {
-            this.setState({
-                mergeImage: b64
-            })
-        });
+    mergeImage() {
+        let { backgroundImage, overlayImage, backgroundImagex, backgroundImagey, overlayImagex, overlayImagey } = this.state;
+        if(backgroundImage && overlayImage){
+            mergeImages([
+                { src: backgroundImage, x: backgroundImagex, y: backgroundImagey },
+                { src: overlayImage, x: overlayImagex, y: overlayImagey }
+            ]).then(b64 => {
+                this.setState({
+                    mergeImage: b64
+                })
+            });
+        }
     }
 
     positionchange(e) {
@@ -41,11 +43,11 @@ class mainComponent extends React.Component {
         this.setState({
             [name]: value
         }, () => {
-            this.mergeImage(this.state.file1, this.state.file2)
+            this.mergeImage();
         })
     }
 
-    blurchange(e){
+    blurchange(e) {
         let { value } = e.target;
         const canvas = document.createElement('canvas');
         canvas.height = 400;
@@ -53,12 +55,11 @@ class mainComponent extends React.Component {
         let ctx = canvas.getContext('2d');
         ctx.filter = `blur(${value}px)`;
         let image = new Image();
-        image.src = this.state.file1;
-        image.onload=()=>{
+        image.src = this.state.backgroundImage;
+        image.onload = () => {
             ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
             this.setState({
-                file1: canvas.toDataURL("image/png"),
-
+                backgroundImage: canvas.toDataURL("image/png"),
             })
         }
     }
@@ -70,36 +71,36 @@ class mainComponent extends React.Component {
                     <div style={{ display: 'flex', justifyContent: 'space-around' }}>
                         <div style={{ width: '35%' }}>
                             <div>
-                                <label for="Imageinput" class={this.state.file2 ? "text-success" : "text-primary"}>Select Image</label>
-                                <input id="Imageinput" class="invisible" type="file" onChange={(e) => { this.handleChange(e, 'file2') }} />
+                                <label for="Imageinput" class={this.state.overlayImage ? "text-success" : "text-primary"}>Select Image</label>
+                                <input id="Imageinput" class="invisible" type="file" onChange={(e) => { this.uploadImage(e, 'overlayImage') }} />
                             </div>
-                            {this.state.file2 ? <div>
+                            {this.state.overlayImage ? <div>
                                 <div class="row mt-2">
                                     <div class="col-md-4">
                                         <label>X-Position</label>
-                                        <input type='number' class="form-control" name='file2x' value={this.state.file2x} onChange={(e) => this.positionchange(e)} />
+                                        <input type='number' class="form-control" name='overlayImagex' value={this.state.overlayImagex} onChange={(e) => this.positionchange(e)} />
                                     </div>
                                     <div class="col-md-4">
                                         <label>y-Position</label>
-                                        <input type='number' class="form-control" name='file2y' value={this.state.file2y} onChange={(e) => this.positionchange(e)} />
+                                        <input type='number' class="form-control" name='overlayImagey' value={this.state.overlayImagey} onChange={(e) => this.positionchange(e)} />
                                     </div>
                                 </div>
                             </div> : ""}
                         </div>
                         <div style={{ width: '35%' }}>
                             <div>
-                                <label for="Imageinput2" class={this.state.file1 ? "btn text-success" : "btn text-primary"}>Select Background Image</label>
-                                <input id="Imageinput2" class="invisible" type="file" onChange={(e) => { this.handleChange(e, 'file1') }} />
+                                <label for="Imageinput2" class={this.state.backgroundImage ? "btn text-success" : "btn text-primary"}>Select Background Image</label>
+                                <input id="Imageinput2" class="invisible" type="file" onChange={(e) => { this.uploadImage(e, 'backgroundImage') }} />
                             </div>
-                            {this.state.file1 ? <div>
+                            {this.state.backgroundImage ? <div>
                                 <div class="row">
                                     <div class="col-md-4">
                                         <label>X-Position</label>
-                                        <input type='number' class="form-control" name='file1x' value={this.state.file1x} onChange={(e) => this.positionchange(e)} />
+                                        <input type='number' class="form-control" name='backgroundImagex' value={this.state.backgroundImagex} onChange={(e) => this.positionchange(e)} />
                                     </div>
                                     <div class="col-md-4">
                                         <label>y-Position</label>
-                                        <input type='number' class="form-control" name='file1y' value={this.state.file1y} onChange={(e) => this.positionchange(e)} />
+                                        <input type='number' class="form-control" name='backgroundImagey' value={this.state.backgroundImagey} onChange={(e) => this.positionchange(e)} />
                                     </div>
                                 </div>
                                 <div class="row">
@@ -109,16 +110,16 @@ class mainComponent extends React.Component {
                                     </div>
                                 </div>
                             </div>
-                            : ""
+                                : ""
                             }
                         </div>
                         <div style={{ width: '20%' }}>
-                            <button type="button" class="btn btn-success" onClick={(e) => { this.mergeImage(this.state.file1, this.state.file2) }}>Display</button>
+                            <button type="button" class="btn btn-success" onClick={(e) => { this.mergeImage() }}>Apply Changes</button>
                         </div>
                     </div>
                 </div>
                 {this.state.mergeImage ? <div class="text-center">
-                    <a href={this.state.mergeImage} download><img class="mt-3" style={{ height: '20vw', width: '20vw' }} id="123" alt="aa" src={this.state.mergeImage} ></img></a>
+                    <a href={this.state.mergeImage} download><img class="mt-3" style={{ height: 400, width: 400 }} id="123" alt="aa" src={this.state.mergeImage}></img></a>
                 </div> : ""}
             </div>
         );
